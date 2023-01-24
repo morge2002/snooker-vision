@@ -3,4 +3,4 @@ names:
 - Billiard table
 nc: 2
 path: /Users/morganlewis/PycharmProjects/snooker-vision/datasets/snooker_vision
-validation: ./images/validation/
+val: ./images/validation/
