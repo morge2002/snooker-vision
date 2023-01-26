@@ -35,13 +35,13 @@ def pull_store_datasets(
         print(f"Computing {split} dataset metadata...")
         dataset.compute_metadata()
         print(f"Evaluating {split} dataset detections...")
-        dataset.evaluate_detections(
-            "predictions",
-            gt_field="detections",
-            method="open-images",
-            classes=export_classes,
-            use_boxes=True,
-        )
+        # dataset.evaluate_detections(
+        #     "predictions",
+        #     gt_field="detections",
+        #     method="open-images",
+        #     classes=export_classes,
+        #     use_boxes=True,
+        # )
         print(f"Exporting {split} dataset...")
         dataset.export(
             export_dir="datasets/snooker_vision",
