@@ -9,6 +9,18 @@ report back certain details such as score, player at the table, pot success etc.
 new interactive games on pool and snooker tables. Such as, displaying each player and their number of lives when playing
 a game of 'Killer'.
 
+# File Index
+
+- [Get Images Script](file://object_detection_model/images/get_images.py)
+- [Open Images Dataset](file://datasets/snooker_vision)
+- [RoboFlow Dataset](file://datasets/robflow_dataset)
+- [RoboFlow Dataset (model)](file://object_detection_model/YOLOv5/yolov5/data/snooker_vision_dataset)
+
+
+- [Training Dataset YAML](file://object_detection_model/YOLOv5/yolov5/data/snooker_vision.yaml)
+- [Trained Weights (exp5)](file://object_detection_model/YOLOv5/yolov5/runs/train/exp5/weights/best.pt) 
+- [Inference Results (9 ball video)](file://object_detection_model/YOLOv5/yolov5/runs/detect/exp8/9_ball_video.mp4)
+
 # Dataset (RoboFlow)
 ## Dataset Insights
 
