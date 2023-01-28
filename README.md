@@ -11,9 +11,9 @@ a game of 'Killer'.
 
 # File Index
 
-- [Get Images Script](file://object_detection_model/images/get_images.py)
-- [Open Images Dataset](file://datasets/snooker_vision)
-- [RoboFlow Dataset](file://datasets/robflow_dataset)
+- [Get Images Script](file://snooker-vision/object_detection_model/images/get_images.py)
+- [Open Images Dataset](datasets/snooker_vision)
+- [RoboFlow Dataset](snooker-vision/datasets/robflow_dataset)
 - [RoboFlow Dataset (model)](file://object_detection_model/YOLOv5/yolov5/data/snooker_vision_dataset)
 
 
