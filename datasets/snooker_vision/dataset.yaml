@@ -1,0 +1,8 @@
+names:
+- Ball
+- Billiard table
+nc: 2
+path: /Users/morganlewis/PycharmProjects/snooker-vision/datasets/snooker_vision
+test: ./images/test/
+train: ./images/train/
+val: ./images/validation/
