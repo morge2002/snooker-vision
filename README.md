@@ -104,6 +104,6 @@ The results of the inference will be saved in the yolov5/data/runs/detect direct
 
 ### Pool
 
-[](object_detection_model/YOLOv5/yolov5/runs/detect/exp8/9_ball_video.mp4)
+[Video](object_detection_model/YOLOv5/yolov5/runs/detect/exp8/9_ball_video.mp4)
 
 # Next Steps
