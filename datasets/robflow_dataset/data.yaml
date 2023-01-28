@@ -1,0 +1,16 @@
+
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 2
+names:
+  0: "Ball"
+  1: "Billiard table"
+
+roboflow:
+  workspace: morgan-lewis
+  project: snooker-vision
+  version: 1
+  license: MIT
+  url: https://universe.roboflow.com/morgan-lewis/snooker-vision/dataset/1
