@@ -11,15 +11,15 @@ a game of 'Killer'.
 
 # File Index
 
-- [Get Images Script](file://snooker-vision/object_detection_model/images/get_images.py)
+- [Get Images Script](object_detection_model/images/get_images.py)
 - [Open Images Dataset](datasets/snooker_vision)
-- [RoboFlow Dataset](snooker-vision/datasets/robflow_dataset)
-- [RoboFlow Dataset (model)](file://object_detection_model/YOLOv5/yolov5/data/snooker_vision_dataset)
+- [RoboFlow Dataset](datasets/robflow_dataset)
+- [RoboFlow Dataset (model)](object_detection_model/YOLOv5/yolov5/data/snooker_vision_dataset)
 
 
-- [Training Dataset YAML](file://object_detection_model/YOLOv5/yolov5/data/snooker_vision.yaml)
-- [Trained Weights (exp5)](file://object_detection_model/YOLOv5/yolov5/runs/train/exp5/weights/best.pt) 
-- [Inference Results (9 ball video)](file://object_detection_model/YOLOv5/yolov5/runs/detect/exp8/9_ball_video.mp4)
+- [Training Dataset YAML](object_detection_model/YOLOv5/yolov5/data/snooker_vision.yaml)
+- [Trained Weights (exp5)](object_detection_model/YOLOv5/yolov5/runs/train/exp5/weights/best.pt) 
+- [Inference Results (9 ball video)](object_detection_model/YOLOv5/yolov5/runs/detect/exp8/9_ball_video.mp4)
 
 # Dataset (RoboFlow)
 ## Dataset Insights
