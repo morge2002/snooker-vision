@@ -1,0 +1,15 @@
+train: ./data/snooker_vision_dataset/train/images
+val: ./data/snooker_vision_dataset/valid/images
+test: ./data/snooker_vision_dataset/test/images# Train YOLOv5s on COCO128 for 3 epochs
+# Train YOLOv5s on COCO128 for 3 epochs
+nc: 2
+names:
+  0: "Ball"
+  1: "Billiard table"
+
+roboflow:
+  workspace: morgan-lewis
+  project: snooker-vision
+  version: 1
+  license: MIT
+  url: https://universe.roboflow.com/morgan-lewis/snooker-vision/dataset/1
