@@ -104,6 +104,12 @@ The results of the inference will be saved in the yolov5/data/runs/detect direct
 
 ### Pool
 
-[Video](object_detection_model/YOLOv5/yolov5/runs/detect/exp8/9_ball_video.mp4)
+https://user-images.githubusercontent.com/55479381/215319466-7a7973a1-1a8c-4d80-890d-a8f65c2b6016.mp4
+
+### Snooker
+
+![snooker_photo](https://user-images.githubusercontent.com/55479381/215319527-d3aef6f6-6d55-41ff-a3ab-81a2ac8dddcf.png)
+
+https://user-images.githubusercontent.com/55479381/215319501-b59c8d31-1593-47fe-8cda-eaf15d75d1c4.mp4
 
 # Next Steps
