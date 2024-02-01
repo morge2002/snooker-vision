@@ -4,13 +4,18 @@ from PIL import Image
 
 # Config
 image_inference = False
+video_inference = False
 export_model = False
+train_model = True
+
+dataset_path = "dataset/snooker-vision.v2i.yolov8/data.yaml"
 model_path = "runs/detect/train11/weights/best_openvino_model"
 weights_path = "runs/detect/train11/weights/best.pt"
 
 # Train the model
-# model = YOLO("yolov8n.pt")
-# model.train(data="dataset/snooker-vision.v1i.yolov8/data.yaml", epochs=100, imgsz=640, batch=-1)
+if train_model:
+    model = YOLO("yolov8n.pt")
+    model.train(data=dataset_path, epochs=200, imgsz=640, batch=-1)
 
 # Export the model
 if export_model:
@@ -32,44 +37,44 @@ if image_inference:
         # im.save('results.jpg')  # save image
 
 # Inference - Video
+if video_inference:
+    # Open the video file
+    video_path = "test_data/english_pool_video.mp4"
+    cap = cv2.VideoCapture(video_path)
 
-# Open the video file
-video_path = "test_data/english_pool_video.mp4"
-cap = cv2.VideoCapture(video_path)
+    # Loop through the video frames
+    while cap.isOpened():
+        # Read a frame from the video
+        success, frame = cap.read()
 
-# Loop through the video frames
-while cap.isOpened():
-    # Read a frame from the video
-    success, frame = cap.read()
+        if success:
+            # Run YOLOv8 inference on the frame
+            # results = model.predict(frame, device="cpu", max_det=17)
 
-    if success:
-        # Run YOLOv8 inference on the frame
-        # results = model.predict(frame, device="cpu", max_det=17)
+            # Image tracking
+            results = model.track(
+                frame,
+                persist=True,
+                tracker="track/custom_bytetrack.yaml",
+                device="cpu",
+                max_det=17,
+            )
 
-        # Image tracking
-        results = model.track(
-            frame,
-            persist=True,
-            tracker="track/custom_bytetrack.yaml",
-            device="cpu",
-            max_det=17,
-        )
+            # Visualize the results on the frame
+            annotated_frame = results[0].plot(labels=True, conf=False)
 
-        # Visualize the results on the frame
-        annotated_frame = results[0].plot(labels=True, conf=False)
+            # Display the annotated frame
+            cv2.imshow("YOLOv8 Inference", annotated_frame)
 
-        # Display the annotated frame
-        cv2.imshow("YOLOv8 Inference", annotated_frame)
-
-        # Break the loop if 'q' is pressed
-        if cv2.waitKey(1) & 0xFF == ord("q"):
+            # Break the loop if 'q' is pressed
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
+        else:
+            # Break the loop if the end of the video is reached
             break
-    else:
-        # Break the loop if the end of the video is reached
-        break
 
-# Release the video capture object and close the display window
-cap.release()
-cv2.destroyAllWindows()
+    # Release the video capture object and close the display window
+    cap.release()
+    cv2.destroyAllWindows()
 
 # model(video_path, save=True)
