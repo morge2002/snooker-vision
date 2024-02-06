@@ -4,7 +4,7 @@ from PIL import Image
 
 # Config
 image_inference = False
-video_inference = False
+video_inference = True
 export_model = False
 train_model = False
 
