@@ -6,16 +6,18 @@ from PIL import Image
 image_inference = False
 video_inference = False
 export_model = False
-train_model = True
+train_model = False
 
 dataset_path = "dataset/snooker-vision.v2i.yolov8/data.yaml"
-model_path = "runs/detect/train11/weights/best_openvino_model"
-weights_path = "runs/detect/train11/weights/best.pt"
+model_path = "runs/detect/train13/weights/best_openvino_model"
+weights_path = "runs/detect/train13/weights/best.pt"
+
+video_path = "test_data/english_pool_video.mp4"
 
 # Train the model
 if train_model:
     model = YOLO("yolov8n.pt")
-    model.train(data=dataset_path, epochs=200, imgsz=640, batch=-1)
+    model.train(data=dataset_path, epochs=100, imgsz=640, batch=-1)
 
 # Export the model
 if export_model:
@@ -39,7 +41,6 @@ if image_inference:
 # Inference - Video
 if video_inference:
     # Open the video file
-    video_path = "test_data/english_pool_video.mp4"
     cap = cv2.VideoCapture(video_path)
 
     # Loop through the video frames
@@ -78,3 +79,11 @@ if video_inference:
     cv2.destroyAllWindows()
 
 # model(video_path, save=True)
+# model.track(
+#     video_path,
+#     persist=True,
+#     tracker="track/custom_bytetrack.yaml",
+#     device="cpu",
+#     max_det=17,
+#     save=True,
+# )
