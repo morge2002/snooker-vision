@@ -4,7 +4,19 @@ import ultralytics.engine.results
 
 
 class PocketROIHeuristic:
-    def __init__(self, pocket_coordinates: list[list[int]], roi_radii: list[int], **kwargs):
+    """
+    Pocket ROI Heuristic to detect if a ball is potted.
+
+    The heuristic uses the following steps:
+    1. Get the current state of the balls (which region of interests they are in).
+    2. Find the balls that are not in the current state but are in the previous state.
+    3. Check if the balls were in ROIs closer to the pockets (not the largest).
+    4. If the balls were in the closest ROIs, they are potted.
+    """
+
+    balls_potted = []
+
+    def __init__(self, pocket_coordinates: list[list[int, int]], roi_radii: list[int], **kwargs):
         self.pocket_coordinates = pocket_coordinates
 
         #  Sort RIO radii in descending order
@@ -12,7 +24,6 @@ class PocketROIHeuristic:
         pocket_rois = {
             i: {
                 "r": radius,
-                "balls": [],
             }
             for i, radius in enumerate(roi_radii)
         }
@@ -33,27 +44,28 @@ class PocketROIHeuristic:
         self.kwargs = kwargs
 
     def __call__(self, detection_results: ultralytics.engine.results.Results) -> list[int]:
+        """
+        Detects if a ball is potted and updates the state of the balls.
+
+        :param detection_results: Model detection results
+        :return: List of balls potted
+        """
         if not isinstance(detection_results, ultralytics.engine.results.Results):
             raise ValueError("Detection results must be of type ultralytics.engine.results.Results.")
         current_ball_states = self.current_ball_state(detection_results)
         balls_potted = self.detect(current_ball_states)
+        if balls_potted:
+            self.balls_potted += balls_potted
         self.ball_states = current_ball_states
         return balls_potted
-
-    @staticmethod
-    def __get_ball_center(ball_xywh: list[int]) -> (int, int):
-        """
-        Get the center of a ball.
-        """
-        return ball_xywh[0] + (ball_xywh[2] / 2), ball_xywh[1] + (ball_xywh[3] / 2)
 
     def __ball_in_roi(self, ball_xywh: list[int]) -> tuple[int, list[int]] | None:
         """
         Check if a ball is in a region of interest.
 
-        Returns the pocket and the ROIs the ball is in.
+        :return: The pocket and the ROIs the ball is in or None if the ball is not in any ROI.
         """
-        ball_center = self.__get_ball_center(ball_xywh)
+        ball_center = (int(ball_xywh[0]), int(ball_xywh[1]))
         for pocket_key, pocket in self.pockets.items():
             rois_present = []
             for roi_key, roi in pocket["rois"].items():
@@ -70,7 +82,6 @@ class PocketROIHeuristic:
                 break
         return None
 
-    # TODO: Figure out why the 147 ball is not being detected as in an roi when almost potted
     def current_ball_state(
         self, detection_results: ultralytics.engine.results.Results
     ) -> dict[int, tuple[int, list[int]]]:

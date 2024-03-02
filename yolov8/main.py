@@ -3,6 +3,7 @@ from ultralytics import YOLO
 from PIL import Image
 
 from yolov8.pot_detection import PocketROIHeuristic
+from yolov8.table_segmentation import get_user_pockets
 
 # Config
 image_inference = False
@@ -45,46 +46,11 @@ if video_inference:
     # Open the video file
     cap = cv2.VideoCapture(video_path)
 
-    # Store pocket coordinates
-    pocket_coordinates = []
+    # Get and store the user-selected pockets
+    pocket_coordinates = get_user_pockets(cap)
 
-    def click_event(event, x, y, flags, param):
-        global pocket_coordinates
-        if event == cv2.EVENT_LBUTTONDOWN:
-            print(f"Clicked at ({x}, {y})")
-            pocket_coordinates.append([x, y])
-
-    # Check if the video file opened successfully
-    if not cap.isOpened():
-        print("Error: Unable to open video file")
-        exit()
-
-    # Read the first frame
-    ret, first_frame = cap.read()
-
-    # Check if the frame was read successfully
-    if not ret:
-        print("Error: Unable to read first frame from video")
-        exit()
-
-    # Create a window and display the first frame
-    cv2.namedWindow("Pocket Selection")
-    cv2.imshow("Pocket Selection", first_frame)
-
-    # Set the mouse callback function
-    cv2.setMouseCallback("Pocket Selection", click_event)
-
-    # Wait for the user to click six times
-    while len(pocket_coordinates) < 6:
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord("q"):
-            break
-
-    # Release the window
-    cv2.destroyWindow("Pocket Selection")
-
-    rios = [5, 10, 20, 50]
-    pot_detector = PocketROIHeuristic(pocket_coordinates, rios)
+    rois = [5, 25, 50]
+    pot_detector = PocketROIHeuristic(pocket_coordinates, rois)
 
     # Loop through the video frames
     while cap.isOpened():
@@ -109,8 +75,13 @@ if video_inference:
 
             # Draw the pocket coordinates and RIOs on the frame
             for pocket in pocket_coordinates:
-                for roi in rios:
+                for roi in rois:
                     cv2.circle(annotated_frame, (pocket[0], pocket[1]), roi, (0, 0, 255), 2)
+
+            for ball_coord in results[0].boxes.xywh:
+                cv2.circle(annotated_frame, (int(ball_coord[0]), int(ball_coord[1])), 2, (255, 0, 255), 2)
+
+            print(f"balls potted: {pot_detector.balls_potted}")
 
             # Display the annotated frame
             cv2.imshow("YOLOv8 Inference", annotated_frame)
