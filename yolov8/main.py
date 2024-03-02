@@ -1,9 +1,11 @@
 import cv2
+import numpy as np
 from ultralytics import YOLO
 from PIL import Image
 
 from yolov8.pot_detection import PocketROIHeuristic
-from yolov8.table_segmentation import get_user_pockets
+from yolov8.table_segmentation import TableProjection
+from yolov8.user_input import get_user_corners, record_user_clicks_from_image
 
 # Config
 image_inference = False
@@ -46,8 +48,19 @@ if video_inference:
     # Open the video file
     cap = cv2.VideoCapture(video_path)
 
-    # Get and store the user-selected pockets
-    pocket_coordinates = get_user_pockets(cap)
+    # Get and store the user-selected corners for table projection
+    corner_coordinates = get_user_corners(cap)
+    table_projection = TableProjection(corner_coordinates)
+
+    # Project the first frame of the video to the table
+    ret, first_frame = cap.read()
+    if not ret:
+        print("Error: Unable to read first frame from video")
+        exit()
+    projected_frame = table_projection(first_frame)
+
+    # Get and store the user-selected pockets for pocket detection
+    pocket_coordinates = record_user_clicks_from_image(projected_frame, "Select Pockets", 6)
 
     rois = [5, 25, 50]
     pot_detector = PocketROIHeuristic(pocket_coordinates, rois)
@@ -60,6 +73,7 @@ if video_inference:
         if success:
             # Run YOLOv8 inference on the frame
             # results = model.predict(frame, device="cpu", max_det=17)
+            frame = table_projection(frame)
 
             # Image tracking
             results = model.track(

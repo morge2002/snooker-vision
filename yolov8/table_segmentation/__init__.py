@@ -1,1 +1,1 @@
-from .user_pocket_selection import get_user_pockets
+from .table_projection import TableProjection
