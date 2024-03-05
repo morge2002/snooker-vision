@@ -1,2 +1,3 @@
 from .pocket_roi_heuristic import PocketROIHeuristic
 from .linear_extrapolation_heuristic import LinearExtrapolationHeuristic
+from .pot_detector import PotDetector
