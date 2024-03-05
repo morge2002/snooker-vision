@@ -16,16 +16,16 @@ class PocketROIHeuristic:
 
     balls_potted = []
 
-    def __init__(self, pocket_coordinates: list[list[int, int]], roi_radii: list[int], **kwargs):
+    def __init__(self, pocket_coordinates: list[list[int, int]], pocket_roi_radii: list[int], **kwargs):
         self.pocket_coordinates = pocket_coordinates
 
         #  Sort RIO radii in descending order
-        roi_radii = sorted(roi_radii, reverse=True)
+        pocket_roi_radii = sorted(pocket_roi_radii, reverse=True)
         pocket_rois = {
             i: {
                 "r": radius,
             }
-            for i, radius in enumerate(roi_radii)
+            for i, radius in enumerate(pocket_roi_radii)
         }
         self.pockets = {
             i: {
@@ -89,8 +89,6 @@ class PocketROIHeuristic:
         Return the current state of the balls.
         """
         detections = detection_results.boxes
-        if not detections.is_track:
-            raise ValueError("Balls must be tracked.")
 
         ball_states: dict[int, tuple[int, list[int]]] = {}
         for i in range(len(detections.id)):

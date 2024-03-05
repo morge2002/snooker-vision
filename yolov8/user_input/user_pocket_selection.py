@@ -6,13 +6,6 @@ import cv2
 def record_user_clicks_from_first_frame(
     cap: cv2.VideoCapture, window_name: str, number_of_clicks: int
 ) -> list[list[int, int]]:
-    point_coords = []
-
-    def click_event(event, x, y, flags, param):
-        if event == cv2.EVENT_LBUTTONDOWN:
-            print(f"Clicked at ({x}, {y})")
-            point_coords.append([x, y])
-
     # Check if the video file opened successfully
     if not cap.isOpened():
         print("Error: Unable to open video file")
