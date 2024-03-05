@@ -1,9 +1,8 @@
 import cv2
-import numpy as np
-from ultralytics import YOLO
 from PIL import Image
+from ultralytics import YOLO
 
-from yolov8.pot_detection import PocketROIHeuristic
+from yolov8.pot_detection import PocketROIHeuristic, LinearExtrapolationHeuristic
 from yolov8.table_segmentation import TableProjection
 from yolov8.user_input import get_user_corners, record_user_clicks_from_image
 
@@ -65,6 +64,9 @@ if video_inference:
     rois = [5, 25, 50]
     pot_detector = PocketROIHeuristic(pocket_coordinates, rois)
 
+    # Predicts the path of balls
+    path_predictor = LinearExtrapolationHeuristic()
+
     # Loop through the video frames
     while cap.isOpened():
         # Read a frame from the video
@@ -92,16 +94,32 @@ if video_inference:
                 for roi in rois:
                     cv2.circle(annotated_frame, (pocket[0], pocket[1]), roi, (0, 0, 255), 2)
 
-            for ball_coord in results[0].boxes.xywh:
-                cv2.circle(annotated_frame, (int(ball_coord[0]), int(ball_coord[1])), 2, (255, 0, 255), 2)
+            for predicted_ball_coord in results[0].boxes.xywh:
+                cv2.circle(
+                    annotated_frame, (int(predicted_ball_coord[0]), int(predicted_ball_coord[1])), 2, (255, 0, 255), 2
+                )
 
-            print(f"balls potted: {pot_detector.balls_potted}")
+            # Predict the next position of the balls using linear extrapolation and show the path on the frame
+            path_predictions = path_predictor(results)
+            for i, ball_id in enumerate(results[0].boxes.id):
+                ball_id = int(ball_id)
+                if ball_id not in path_predictions:
+                    continue
+                predicted_ball_coord = path_predictions[ball_id]
+                cv2.line(
+                    annotated_frame,
+                    (int(results[0].boxes.xywh[i][0]), int(results[0].boxes.xywh[i][1])),
+                    (int(predicted_ball_coord[0]), int(predicted_ball_coord[1])),
+                    (0, 255, 0),
+                    2,
+                )
 
             # Display the annotated frame
             cv2.imshow("YOLOv8 Inference", annotated_frame)
 
             # Detect pot using ROI heuristic
             pot_detector(results[0])
+            print(f"balls potted: {pot_detector.balls_potted}")
 
             # Break the loop if 'q' is pressed
             if cv2.waitKey(1) & 0xFF == ord("q"):
