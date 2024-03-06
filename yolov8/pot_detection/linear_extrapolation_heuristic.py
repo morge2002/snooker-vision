@@ -1,31 +1,35 @@
 from __future__ import annotations
 
+from typing import List
+
 import cv2
 import numpy as np
 import ultralytics.engine.results
 
+from yolov8.ball import Balls, Ball
 
-# TODO: Need to add logic to specify if a ball is headed to a pocket. The PotDetector will use this along with other
-#  heuristics to determine if a pot has been made
+
+# TODO: Consider a ball's velocity when predicting a pot (i.e the ball must be moving fast enough to reach the pocket).
+#  However, this is dangerous because the deceleration of the ball is not considered and if it is different tables will
+#  react differently.
 class LinearExtrapolationHeuristic:
-    def __init__(self, pocket_coordinates: list[list[int, int]] = None, **kwargs):
-        # Data structure to keep track of the balls
-        # Structure: {ball_id: {"x": x, "y": y, "direction_vector": [dx, dy], "pocketed": False}}
-        self.balls = {}
+    def __init__(self, balls: Balls, pocket_coordinates: list[list[int, int]] = None, **kwargs):
+        self.balls = balls
         self.pocket_coordinates = pocket_coordinates
+        self.pocket_radius = 10
+        self.missing_frame_threshold = 30
 
-    def __call__(self, detection_results: ultralytics.engine.results.Results) -> dict[int, list[int]]:
+    def __call__(self, detection_results: ultralytics.engine.results.Results) -> dict[int, list[float]]:
         """
         Predict the next position of the balls using linear extrapolation.
 
         :param detection_results: Model detection results
         :return: Dictionary of ball predictions
         """
-
-        self.update_ball_states(detection_results)
+        self.potential_pots(detection_results)
         return self.get_ball_predictions()
 
-    def get_ball_predictions(self) -> dict[int, list[int]]:
+    def get_ball_predictions(self) -> dict[int, list[float]]:
         """
         Predict the next position of the balls using linear extrapolation.
 
@@ -33,7 +37,7 @@ class LinearExtrapolationHeuristic:
         """
         ball_predictions = {}
         for ball_id, ball in self.balls.items():
-            if ball["pocketed"]:
+            if ball.pocketed:
                 continue
             ball_predictions[int(ball_id)] = self.__predict_ball_position(ball)
         return ball_predictions
@@ -75,69 +79,29 @@ class LinearExtrapolationHeuristic:
             ball = self.balls[int(ball_id)]
             for pocket_coords in self.pocket_coordinates:
                 if self.__check_circle_line_intersection(
-                    ball["x"],
-                    ball["y"],
-                    ball["x"] + ball["direction_vector"][0],
-                    ball["y"] + ball["direction_vector"][1],
+                    ball.x,
+                    ball.y,
+                    ball.x + ball.get_direction_vector()[0],
+                    ball.y + ball.get_direction_vector()[1],
                     pocket_coords[0],
                     pocket_coords[1],
-                    10,
+                    self.pocket_radius,
                 ):
                     potential_pots.append(int(ball_id))
         return potential_pots
 
-    def update_ball_states(self, detections: ultralytics.engine.results.Results) -> None:
-        detections = detections.boxes
-
-        if detections.id is None:
-            return
-
-        for i in range(len(detections.id)):
-            ball_id = int(detections.id[i])
-            ball_x = float(detections.xywh[i][0])
-            ball_y = float(detections.xywh[i][1])
-            if ball_id not in self.balls:
-                self.balls[ball_id] = {
-                    "x": ball_x,
-                    "y": ball_y,
-                    "direction_vector": [0, 0],
-                    "pocketed": False,
-                }
-
-            self.balls[ball_id]["direction_vector"] = self.__calculate_direction_vector(ball_id, ball_x, ball_y)
-            self.balls[ball_id]["x"] = ball_x
-            self.balls[ball_id]["y"] = ball_y
-
-    def __calculate_direction_vector(self, ball_id: int, next_x: float, next_y: float) -> list[float]:
-        ball = self.balls[ball_id]
-
-        r1 = np.array([ball["x"], ball["y"]])  # Initial position (x1, y1)
-        r2 = np.array([next_x, next_y])  # Final position (x2, y2)
-
-        displacement = r2 - r1
-        if not displacement.any():
-            return displacement
-        # Apply a threshold to the displacement to avoid noise in the direction vector
-        if np.linalg.norm(displacement) < 0.5:
-            return [0.0, 0.0]
-        magnitude = np.linalg.norm(displacement)
-
-        # Normalize displacement vector to obtain direction vector
-        direction_vector = displacement / magnitude
-
-        return direction_vector
-
     @staticmethod
-    def __predict_ball_position(ball: dict) -> list[int]:
+    def __predict_ball_position(ball: Ball) -> list[float]:
         """
         Predict the next position of a ball using linear extrapolation.
 
         :param ball: Ball state.
         :return: Predicted the position of the ball.
         """
+        direction_vector = ball.get_direction_vector()
         return [
-            ball["x"] + 100 * ball["direction_vector"][0],
-            ball["y"] + 100 * ball["direction_vector"][1],
+            ball.x + 100 * direction_vector[0],
+            ball.y + 100 * direction_vector[1],
         ]
 
     def draw_ball_direction_lines(self, detection_results: ultralytics.engine.results.Results, frame) -> None:
@@ -154,3 +118,17 @@ class LinearExtrapolationHeuristic:
                 (0, 255, 0),
                 2,
             )
+
+    def potential_pots(self, detection_results: ultralytics.engine.results.Results) -> list[int]:
+        balls_detected = [int(id) for id in detection_results.boxes.id]
+        missing_balls = list(set(self.balls) - set(balls_detected))
+        potential_pots = self.get_potential_pots(missing_balls)
+        print(f"Potential pots towards pockets: {potential_pots}")
+        for ball_id in potential_pots:
+            if (
+                self.balls[ball_id].missing_frame_count > self.missing_frame_threshold
+                and not self.balls[ball_id].pocketed
+            ):
+                self.balls[ball_id].pocketed = True
+                print(f"Ball {ball_id} potted")
+        return potential_pots
