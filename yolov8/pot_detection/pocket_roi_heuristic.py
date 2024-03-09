@@ -106,6 +106,7 @@ class PocketROIHeuristic:
         potential_potted_balls = set(self.ball_states.keys()) - set(current_ball_states.keys())
         for ball_id in potential_potted_balls:
             pocket_id, rois = self.ball_states[ball_id]
+            # TODO: Need to consider that the ball disappears for more than n frames
             # The ball can only leave the pocket if it's in the last ROI only
             if rois != [0]:
                 balls_potted.append(ball_id)
