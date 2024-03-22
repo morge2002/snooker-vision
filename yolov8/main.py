@@ -4,6 +4,7 @@ from ultralytics import YOLO
 
 from yolov8.ball import Balls
 from yolov8.pot_detection import PotDetector
+from yolov8.shot_detection import ShotDetector
 from yolov8.table_segmentation import TableProjection
 from yolov8.user_input import get_user_corners, record_user_clicks_from_image
 
@@ -66,6 +67,9 @@ if video_inference:
     # Class to track ball state
     balls = Balls()
 
+    # Class to detect if a shot has started or ended
+    shot_detector = ShotDetector(balls)
+
     # Class to detect pots
     pot_detector = PotDetector(pocket_coordinates, pocket_rois, balls)
 
@@ -109,7 +113,19 @@ if video_inference:
                 )
 
             # Update the ball positions and metadata
-            balls.update(results[0])
+            balls.update(results[0], frame)
+
+            # Detect if shot has started
+            if not shot_detector(results[0]):
+                print("Shot ended")
+                # Display the annotated frame
+                cv2.imshow("YOLOv8 Inference", annotated_frame)
+                # Break the loop if 'q' is pressed
+                if cv2.waitKey(1) & 0xFF == ord("q"):
+                    break
+                continue
+
+            print("Shot started")
 
             # Detect pots
             pot_detector(results[0], annotated_frame)
