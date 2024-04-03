@@ -9,15 +9,13 @@ import ultralytics.engine.results
 from yolov8.ball import Balls, Ball
 
 
-# TODO: Consider a ball's velocity when predicting a pot (i.e the ball must be moving fast enough to reach the pocket).
-#  However, this is dangerous because the deceleration of the ball is not considered and if it is different tables will
-#  react differently.
 class LinearExtrapolationHeuristic:
     def __init__(self, balls: Balls, pocket_coordinates: list[list[int, int]] = None, **kwargs):
         self.balls = balls
         self.pocket_coordinates = pocket_coordinates
         self.pocket_radius = 10
         self.missing_frame_threshold = 30
+        self.__pot_velocity_threshold = 1
 
     def __call__(self, detection_results: ultralytics.engine.results.Results) -> dict[int, list[float]]:
         """
@@ -125,14 +123,17 @@ class LinearExtrapolationHeuristic:
             )
 
     def potential_pots(self, detection_results: ultralytics.engine.results.Results) -> list[int]:
-        balls_detected = [int(id) for id in detection_results.boxes.id]
+        balls_detected = [int(ball_id) for ball_id in detection_results.boxes.id]
         missing_balls = list(set(self.balls) - set(balls_detected))
         potential_pots = self.get_potential_pots(missing_balls)
         print(f"Potential pots towards pockets: {potential_pots}")
         for ball_id in potential_pots:
+            # If the ball is missing for more than n frames, is not pocketed and has a velocity above the threshold,
+            # consider it potted
             if (
                 self.balls[ball_id].missing_frame_count > self.missing_frame_threshold
                 and not self.balls[ball_id].pocketed
+                and self.balls[ball_id].get_velocity() > self.__pot_velocity_threshold
             ):
                 self.balls[ball_id].pocketed = True
                 print(f"Ball {ball_id} potted")
