@@ -99,9 +99,14 @@ class LinearExtrapolationHeuristic:
         :return: Predicted the position of the ball.
         """
         direction_vector = ball.get_direction_vector()
+        velocity = ball.get_velocity()
+        # Show direction line with length proportional to the velocity
+        line_length = 0
+        if velocity != 0:
+            line_length = 5 * velocity
         return [
-            ball.x + 100 * direction_vector[0],
-            ball.y + 100 * direction_vector[1],
+            ball.x + (line_length * direction_vector[0]),
+            ball.y + (line_length * direction_vector[1]),
         ]
 
     def draw_ball_direction_lines(self, detection_results: ultralytics.engine.results.Results, frame) -> None:
