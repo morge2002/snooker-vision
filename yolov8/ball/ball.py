@@ -17,12 +17,16 @@ class Ball:
         # Number of frames the ball has been missing since the last sighting
         self.missing_frame_count: int = 0
 
-    def update_position(self, new_x: float, new_y: float) -> None:
+    def update_position(self, new_x: float, new_y: float, new_w: float, new_h: float) -> None:
         self.__direction_vector_is_current = False
         self.__velocity_is_current = False
-        # Only update the direction vector if the position has changed for three frames
+        # Only mark the velocity and direction vector as old (needs updateing) if the ball has moved more than 1
+        # pixel in the last 3 frames
         if len(self.coordinate_history) > 0:
-            if self.x == new_x == self.coordinate_history[-1][0] and self.y == new_y == self.coordinate_history[-1][1]:
+            x_pos_not_changed: bool = abs(self.x - new_x) < 1 and abs(new_x - self.coordinate_history[-1][0]) < 1
+            y_pos_not_changed: bool = abs(self.y - new_y) < 1 and abs(new_y - self.coordinate_history[-1][1]) < 1
+            # y_pos_not_changed: bool = self.y == new_y == self.coordinate_history[-1][1]
+            if x_pos_not_changed and y_pos_not_changed:
                 self.__direction_vector_is_current = True
                 self.__velocity_is_current = True
 
