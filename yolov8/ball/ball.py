@@ -3,10 +3,12 @@ import numpy as np
 
 
 class Ball:
-    def __init__(self, ball_id: int, x: float, y: float) -> None:
+    def __init__(self, ball_id: int, x: float, y: float, w: float, h: float) -> None:
         self.ball_id: int = ball_id
         self.x: float = x
         self.y: float = y
+        self.w: float = w
+        self.h: float = h
         self.__direction_vector: list[float] = [0, 0]
         self.__direction_vector_is_current: bool = True
         self.__velocity = 0
@@ -20,7 +22,7 @@ class Ball:
     def update_position(self, new_x: float, new_y: float, new_w: float, new_h: float) -> None:
         self.__direction_vector_is_current = False
         self.__velocity_is_current = False
-        # Only mark the velocity and direction vector as old (needs updateing) if the ball has moved more than 1
+        # Only mark the velocity and direction vector as old (needs updating) if the ball has moved more than 1
         # pixel in the last 3 frames
         if len(self.coordinate_history) > 0:
             x_pos_not_changed: bool = abs(self.x - new_x) < 1 and abs(new_x - self.coordinate_history[-1][0]) < 1
@@ -33,6 +35,8 @@ class Ball:
         self.coordinate_history.append([self.x, self.y])
         self.x = new_x
         self.y = new_y
+        self.w = new_w
+        self.h = new_h
         # Keep only the last 10 coordinates
         if len(self.coordinate_history) > 10:
             self.coordinate_history.pop(0)

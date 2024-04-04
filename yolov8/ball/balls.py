@@ -45,9 +45,12 @@ class Balls:
             ball_id = int(detections.id[i])
             ball_x = float(detections.xywh[i][0])
             ball_y = float(detections.xywh[i][1])
+            ball_w = float(detections.xywh[i][2])
+            ball_h = float(detections.xywh[i][3])
             if ball_id not in self.__balls:
-                self.__balls[ball_id] = Ball(ball_id, ball_x, ball_y)
-            self.__balls[ball_id].update_position(ball_x, ball_y)
+                self.__balls[ball_id] = Ball(ball_id, ball_x, ball_y, ball_w, ball_h)
+                continue
+            self.__balls[ball_id].update_position(ball_x, ball_y, ball_w, ball_h)
 
         for missed_ball in set(self.__balls.keys()) - set(detections.id):
             self.__balls[missed_ball].missed_frame()
