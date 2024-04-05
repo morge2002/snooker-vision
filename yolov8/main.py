@@ -5,7 +5,7 @@ from ultralytics import YOLO
 from yolov8.ball import Balls
 from yolov8.pot_detection import PotDetector
 from yolov8.table_segmentation import TableProjection
-from yolov8.user_input import get_user_corners, record_user_clicks_from_image
+from yolov8.user_input import UserInput
 
 # Config
 image_inference = False
@@ -48,8 +48,10 @@ if video_inference:
     # Open the video file
     cap = cv2.VideoCapture(video_path)
 
+    user_input = UserInput(ask_user_to_reselect_corners=False)
+
     # Get and store the user-selected corners for table projection
-    corner_coordinates = get_user_corners(cap)
+    corner_coordinates = user_input.get_user_corners(cap, video_path)
     table_projection = TableProjection(corner_coordinates)
 
     # Project the first frame of the video to the table
@@ -61,7 +63,7 @@ if video_inference:
 
     # Get and store the user-selected pockets for pocket detection
     pocket_rois = [5, 25, 50]
-    pocket_coordinates = record_user_clicks_from_image(projected_frame, "Select Pockets", 6)
+    pocket_coordinates = user_input.get_user_pockets(projected_frame, video_path)
 
     # Class to track ball state
     balls = Balls()
