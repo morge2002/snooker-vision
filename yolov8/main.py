@@ -3,6 +3,7 @@ from PIL import Image
 from ultralytics import YOLO
 
 from yolov8.ball import Balls
+from yolov8.pockets import Pockets
 from yolov8.pot_detection import PotDetector
 from yolov8.table_segmentation import TableProjection
 from yolov8.user_input import UserInput
@@ -68,8 +69,11 @@ if video_inference:
     # Class to track ball state
     balls = Balls()
 
+    # Class to store the pockets and update which balls are in what pocket ROIs
+    pockets_tracker = Pockets(balls, pocket_coordinates, pocket_rois)
+
     # Class to detect pots
-    pot_detector = PotDetector(pocket_coordinates, pocket_rois, balls)
+    pot_detector = PotDetector(balls, pockets_tracker)
 
     # Loop through the video frames
     while cap.isOpened():
@@ -112,6 +116,9 @@ if video_inference:
 
             # Update the ball positions and metadata
             balls.update(results[0])
+
+            # Update the pocket rois for the balls
+            pockets_tracker(results[0])
 
             # Detect pots
             pot_detector(results[0], annotated_frame)
