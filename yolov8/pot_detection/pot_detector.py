@@ -6,14 +6,15 @@ from yolov8.pockets import Pockets
 from yolov8.pot_detection import PocketROIHeuristic, LinearExtrapolationHeuristic
 
 
+# TODO: Think about if the two methods contradict each other, what happens then? Should the ROI pot not count if
+#  the ball was not heading towards a pocket?
 class PotDetector:
     """
+    Pot Detector class to detect if a ball is potted.
 
-
-    TODO: Think about if the two methods contradict each other, what happens then? Should the ROI pot not count if
-     the ball was not heading towards a pocket?
-
-    TODO: Record when ball is potted (maybe in ball class)
+    The Pot Detector uses two methods to detect if a ball is potted:
+    1. Pocket ROI Heuristic: Detects if a ball is potted based on the region of interest (ROI) of the pockets.
+    2. Linear Extrapolation Heuristic: Predicts the path of the balls and detects if a ball is potted based on the path.
     """
 
     # The window in which all methods must agree on a pot for 100% confidence
