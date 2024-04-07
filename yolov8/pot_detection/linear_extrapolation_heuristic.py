@@ -28,7 +28,7 @@ class LinearExtrapolationHeuristic:
         # The minimum velocity a ball can be travelling before it disappears to be considered a pot
         self.__pot_velocity_threshold = 1
 
-    def __call__(self, detection_results: ultralytics.engine.results.Results) -> dict[int, list[float]]:
+    def __call__(self, detection_results: ultralytics.engine.results.Results) -> list[int]:
         """
         Identify balls potted by identifying balls that are no longer detected, were heading towards a pocket,
         and had reasonable velocity.
@@ -36,14 +36,14 @@ class LinearExtrapolationHeuristic:
         :param detection_results: Model detection results
         :return: Dictionary of ball predictions
         """
-        self.potential_pots(detection_results)
-        return self.get_ball_predictions()
+        balls_potted = self.detect_pots(detection_results)
+        return balls_potted
 
-    def get_ball_predictions(self) -> dict[int, list[float]]:
+    def get_balls_next_location_predictions(self) -> dict[int, list[float]]:
         """
         Predict the next position of the balls using linear extrapolation.
 
-        :return: Dictionary of ball predictions
+        :return: Dictionary of ball predictions: {ball_id: [x, y], ...}
         """
         ball_predictions = {}
         for ball_id, ball in self.balls.items():
@@ -108,7 +108,7 @@ class LinearExtrapolationHeuristic:
             return False
         return True
 
-    def get_potential_pots(self, ball_ids: list[int]) -> list[int]:
+    def get_balls_towards_pockets(self, ball_ids: list[int]) -> list[int]:
         """
         Finds the balls that are heading towards a pocket that is not obstructed by other balls.
 
@@ -188,7 +188,7 @@ class LinearExtrapolationHeuristic:
         :param detection_results: Results from YOLO inference
         :param frame: The frame to draw onto.
         """
-        path_predictions = self.get_ball_predictions()
+        path_predictions = self.get_balls_next_location_predictions()
         for i, ball_id in enumerate(detection_results.boxes.id):
             ball_id = int(ball_id)
             if ball_id not in path_predictions:
@@ -202,18 +202,19 @@ class LinearExtrapolationHeuristic:
                 2,
             )
 
-    def potential_pots(self, detection_results: ultralytics.engine.results.Results) -> list[int]:
+    def detect_pots(self, detection_results: ultralytics.engine.results.Results) -> list[int]:
         """
         Finds balls that could have been potted based on their direction of travel.
 
         :param detection_results: Results from YOLO inference
         :return: List of ball ids that have been detected as potted
         """
+        balls_potted: list[int] = []
         balls_detected = [int(ball_id) for ball_id in detection_results.boxes.id]
         missing_balls = list(set(self.balls) - set(balls_detected))
-        potential_pots = self.get_potential_pots(missing_balls)
-        print(f"Potential pots towards pockets: {potential_pots}")
-        for ball_id in potential_pots:
+        balls_towards_pockets = self.get_balls_towards_pockets(missing_balls)
+        print(f"Balls towards pockets: {balls_towards_pockets}")
+        for ball_id in balls_towards_pockets:
             # If the ball is missing for more than n frames, is not pocketed and has a velocity above the threshold,
             # consider it potted
             if (
@@ -221,6 +222,5 @@ class LinearExtrapolationHeuristic:
                 and not self.balls[ball_id].pocketed
                 and self.balls[ball_id].get_velocity() > self.__pot_velocity_threshold
             ):
-                self.balls[ball_id].pocketed = True
-                print(f"Ball {ball_id} potted")
-        return potential_pots
+                balls_potted.append(ball_id)
+        return balls_potted
