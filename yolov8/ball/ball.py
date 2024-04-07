@@ -14,6 +14,7 @@ class Ball:
         self.__velocity = 0
         self.__velocity_is_current: bool = True
         self.pocketed: bool = False
+        self.potted_confidence: float = 0
         # History of the ball's coordinates
         self.coordinate_history: list[list[float]] = []
         # Number of frames the ball has been missing since the last sighting

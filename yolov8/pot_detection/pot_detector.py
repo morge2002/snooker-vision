@@ -101,11 +101,7 @@ class PotDetector:
                 self.ball_potted(ball_id, 0.25)
 
     def ball_potted(self, ball_id: int, confidence: float):
-        # TODO: make sure this stops balls being potted multiple times (in methods). May need mechanism when
-        #  ball is potted but then detected again
-        # TODO: Remove ball when potted so it's not checked again and move into other list in Balls class. Make this a
-        #  method rather than changing the field directly. Make pocketed field private.
-        self.balls[ball_id].pocketed = True
+        self.balls.ball_potted(ball_id, confidence)
         self.successful_pots[ball_id] = confidence
         del self.potential_pots[ball_id]
         print(f"--- Ball {ball_id} potted with confidence {confidence} ---")
