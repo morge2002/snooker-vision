@@ -10,10 +10,13 @@ from yolov8.ball import Balls
 
 
 class Pockets:
+    """
+    Stores pocket information and updates which balls are in each pocket ROI.
+    """
     def __init__(self, balls: Balls, pocket_coordinates: list[list[int, int]], pocket_roi_radii: list[int]):
         self.balls = balls
         self.pocket_coordinates = pocket_coordinates
-        #  Sort RIO radii in descending order
+        #  Sort RIO radii in descending order so the largest ROI is checked first
         pocket_roi_radii = sorted(pocket_roi_radii, reverse=True)
         pocket_rois = {
             i: {
@@ -31,7 +34,12 @@ class Pockets:
             for i, pocket_coord in enumerate(pocket_coordinates)
         }
 
-    def __call__(self, detection_results: ultralytics.engine.results.Results):
+    def __call__(self, detection_results: ultralytics.engine.results.Results) -> None:
+        """
+        Update the state of the balls in the ROIs.
+
+        :param detection_results: Model detection results
+        """
         if not isinstance(detection_results, ultralytics.engine.results.Results):
             raise ValueError("Detection results must be of type ultralytics.engine.results.Results.")
 
