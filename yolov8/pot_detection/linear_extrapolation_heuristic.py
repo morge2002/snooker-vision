@@ -5,21 +5,22 @@ import numpy as np
 import ultralytics.engine.results
 
 from yolov8.ball import Balls, Ball
+from yolov8.pockets import Pockets
 
 
 # TODO: Collision detection only takes the line from the centre into account, however, the outer edge could hit
 #  the circle. Maybe change this algorithm to see if two circles collide. Although, the size of the object ball
 #  will change as it moves (assuming the ball it contacts with is stationary)
 class LinearExtrapolationHeuristic:
-    def __init__(self, balls: Balls, pocket_coordinates: list[list[int, int]] = None):
+    def __init__(self, balls: Balls, pockets: Pockets):
         """
         Initialise the class with balls collection and pocket information.
 
         :param balls: State of all balls (passed by reference)
-        :param pocket_coordinates: List of pocket coordinates
+        :param pockets: Pocket information
         """
         self.balls = balls
-        self.pocket_coordinates = pocket_coordinates
+        self.pockets = pockets.pockets
         # Size of pockets
         self.pocket_radius = 10
         # The minimum number of frames for a ball to be missing to be considered a pot
@@ -120,8 +121,8 @@ class LinearExtrapolationHeuristic:
             ball = self.balls[int(ball_id)]
             if ball.get_velocity() < self.__pot_velocity_threshold:
                 continue
-            for pocket_coords in self.pocket_coordinates:
-                if not self.__is_object_in_direction(ball, pocket_coords[0], pocket_coords[1], self.pocket_radius):
+            for pocket_id, pocket in self.pockets.items():
+                if not self.__is_object_in_direction(ball, pocket["x"], pocket["y"], self.pocket_radius):
                     continue
 
                 if self.__check_circle_line_intersection(
@@ -129,8 +130,8 @@ class LinearExtrapolationHeuristic:
                     ball.y,
                     ball.x + ball.get_direction_vector()[0],
                     ball.y + ball.get_direction_vector()[1],
-                    pocket_coords[0],
-                    pocket_coords[1],
+                    pocket["x"],
+                    pocket["y"],
                     self.pocket_radius,
                 ):
                     potential_pots.append(int(ball_id))

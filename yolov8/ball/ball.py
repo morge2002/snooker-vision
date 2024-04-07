@@ -18,6 +18,8 @@ class Ball:
         self.coordinate_history: list[list[float]] = []
         # Number of frames the ball has been missing since the last sighting
         self.missing_frame_count: int = 0
+        # The pocket and the ROIs the ball is in
+        self.pocket_roi: tuple[int, list[int]] | tuple[()] = ()
 
     def update_position(self, new_x: float, new_y: float, new_w: float, new_h: float) -> None:
         self.__direction_vector_is_current = False
