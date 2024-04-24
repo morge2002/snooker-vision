@@ -22,6 +22,8 @@ class PotDetector:
     # Stale pot window. After this window the confidence of the pot is finalised
     stale_pot_window = 30
 
+    current_timestamp = 0
+
     def __init__(self, balls: Balls, pockets: Pockets):
         self.balls = balls
 
@@ -29,7 +31,7 @@ class PotDetector:
         # Structure: {ball_id: {detection_method: frames_since_detection, ...}, ...}
         self.potential_pots: dict[int, dict[str, int]] = {}
 
-        self.successful_pots: dict[int, float] = {}
+        self.successful_pots: dict[int, tuple] = {}
 
         # Detects if a ball is potted based on pocket ROIs
         self.pot_detector = PocketROIHeuristic(balls)
@@ -37,10 +39,12 @@ class PotDetector:
         # Predicts the path of balls
         self.path_predictor = LinearExtrapolationHeuristic(balls, pockets)
 
-    def __call__(self, detection_results: ultralytics.engine.results.Results, frame=None) -> None:
+    def __call__(self, detection_results: ultralytics.engine.results.Results, timestamp, frame=None) -> None:
         self.detect_potential_pots(detection_results)
 
         self.path_predictor.draw_ball_direction_lines(detection_results, frame)
+
+        self.current_timestamp = timestamp
 
         self.detect_pots()
 
@@ -103,7 +107,7 @@ class PotDetector:
 
     def ball_potted(self, ball_id: int, confidence: float):
         self.balls.ball_potted(ball_id, confidence)
-        self.successful_pots[ball_id] = confidence
+        self.successful_pots[ball_id] = (confidence, self.current_timestamp)
         del self.potential_pots[ball_id]
         print(f"--- Ball {ball_id} potted with confidence {confidence} ---")
 
