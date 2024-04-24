@@ -32,7 +32,7 @@ class PotDetector:
         self.successful_pots: dict[int, float] = {}
 
         # Detects if a ball is potted based on pocket ROIs
-        self.pot_detector = PocketROIHeuristic(balls, pockets)
+        self.pot_detector = PocketROIHeuristic(balls)
 
         # Predicts the path of balls
         self.path_predictor = LinearExtrapolationHeuristic(balls, pockets)

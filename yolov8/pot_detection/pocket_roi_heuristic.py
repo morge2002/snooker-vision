@@ -3,7 +3,6 @@ from __future__ import annotations
 import ultralytics.engine.results
 
 from yolov8.ball import Balls
-from yolov8.pockets import Pockets
 
 
 class PocketROIHeuristic:
@@ -19,9 +18,8 @@ class PocketROIHeuristic:
     # Number of frames a ball must be missing before it's considered potted
     missing_frame_threshold = 30
 
-    def __init__(self, balls: Balls, pockets: Pockets):
+    def __init__(self, balls: Balls):
         self.balls = balls
-        self.pockets = pockets.pockets
 
     def __call__(self, detection_results: ultralytics.engine.results.Results) -> list[int]:
         """
