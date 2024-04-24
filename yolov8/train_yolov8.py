@@ -1,6 +1,6 @@
 from ultralytics import YOLO
 
-dataset_path = "dataset/snooker-vision.v2i.yolov8/data.yaml"
+dataset_path = "dataset/snooker-vision.v5i.yolov8/data.yaml"
 weights_path = "runs/detect/train13/weights/best.pt"
 
 # Train the model
