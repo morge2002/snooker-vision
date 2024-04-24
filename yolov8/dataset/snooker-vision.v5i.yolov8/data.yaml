@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 3
+names: ['Ball', 'Billiard table', 'Pocket']
+
+roboflow:
+  workspace: morganlewis
+  project: snooker-vision-tjn0z
+  version: 5
+  license: MIT
+  url: https://universe.roboflow.com/morganlewis/snooker-vision-tjn0z/dataset/5
