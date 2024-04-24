@@ -120,7 +120,11 @@ class UserInput:
         rerecord_corners = "n"
         # Check is coords stored in file in the current directory
         table_coords = self.__get_table_coordinates()
-        if video_filename in table_coords:
+        if (
+            video_filename in table_coords
+            and "pockets" in table_coords[video_filename]
+            and len(table_coords[video_filename]["pockets"]) == 6
+        ):
             if self.ask_user_to_reselect_corners:
                 # Check if the user wants to use the previously stored coordinates
                 rerecord_corners = input("Would you like to re-record the table pocket coords? (y/n): ")
