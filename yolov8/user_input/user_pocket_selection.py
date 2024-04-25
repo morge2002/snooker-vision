@@ -12,37 +12,35 @@ class UserInput:
     file for future use.
     """
 
-    table_coordinates_filename = "table_coordinates.json"
+    table_coordinates_filename = os.path.join(os.path.dirname(__file__), "./table_coordinates.json")
 
     def __init__(self, ask_user_to_reselect_corners: bool = True):
         # Ask the user to reselect the corners and pockets or use the previously stored coordinates if available
         self.ask_user_to_reselect_corners = ask_user_to_reselect_corners
 
-    @staticmethod
-    def __get_table_coordinates() -> dict:
+    def __get_table_coordinates(self) -> dict:
         """
         Get the table coordinates from the JSON file.
 
         :return: Dictionary containing the table coordinates.
         """
-        if not os.path.exists("table_coordinates.json"):
-            with open("table_coordinates.json", "w") as file:
+        if not os.path.exists(self.table_coordinates_filename):
+            with open(self.table_coordinates_filename, "w") as file:
                 json.dump({}, file)
                 return {}
-        with open("table_coordinates.json", "r") as file:
+        with open(self.table_coordinates_filename, "r") as file:
             try:
                 return json.load(file)
             except json.JSONDecodeError:
                 return {}
 
-    @staticmethod
-    def __write_table_coordinates(table_coords: dict):
+    def __write_table_coordinates(self, table_coords: dict):
         """
         Write the table coordinates to the JSON file.
 
         :param table_coords: Dictionary containing the table coordinates.
         """
-        with open("table_coordinates.json", "w") as file:
+        with open(self.table_coordinates_filename, "w") as file:
             try:
                 json.dump(table_coords, file)
             except json.JSONDecodeError:
@@ -167,7 +165,7 @@ class UserInput:
         corners = self.record_user_clicks_from_first_frame(cap, "Select Corners", 4)
 
         # Store coords in file in the current directory
-        if not os.path.exists("table_coordinates.json"):
+        if not os.path.exists(self.table_coordinates_filename):
             self.__write_table_coordinates({video_filename: {"corners": corners, "pockets": []}})
             return corners
 
