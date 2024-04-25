@@ -213,7 +213,7 @@ class LinearExtrapolationHeuristic:
         balls_detected = [int(ball_id) for ball_id in detection_results.boxes.id]
         missing_balls = list(set(self.balls) - set(balls_detected))
         balls_towards_pockets = self.get_balls_towards_pockets(missing_balls)
-        print(f"Balls towards pockets: {balls_towards_pockets}")
+        # print(f"Balls towards pockets: {balls_towards_pockets}")
         for ball_id in balls_towards_pockets:
             # If the ball is missing for more than n frames, is not pocketed and has a velocity above the threshold,
             # consider it potted

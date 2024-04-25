@@ -67,8 +67,8 @@ class CueVision:
                     frame,
                     persist=True,
                     tracker=self.tracker_file_path,
-                    device="cpu",
                     max_det=17,
+                    verbose=False,
                 )
 
                 # Skip the frame if no balls are detected/tracked

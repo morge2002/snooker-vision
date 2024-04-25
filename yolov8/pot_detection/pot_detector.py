@@ -109,7 +109,7 @@ class PotDetector:
         self.balls.ball_potted(ball_id, confidence)
         self.successful_pots[ball_id] = (confidence, self.current_timestamp)
         del self.potential_pots[ball_id]
-        print(f"--- Ball {ball_id} potted with confidence {confidence} ---")
+        print(f"--- Ball {ball_id} potted with confidence {confidence} at {self.current_timestamp} ---")
 
 
 # Nabe is a nabe
