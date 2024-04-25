@@ -1,0 +1,6 @@
+Test Video,Pots Detected,Actual Pots,True Positives,False Positives,False Negatives,True Positives Timestamps,False Positives Timestamps,False Negatives Timestamps
+/Users/morganlewis/PycharmProjects/snooker-vision/tests/./test_data/english_pool_dish_one_frame.mp4,9,9,8,1,1,"[2060, 5530, 30030, 42460, 57420, 71410, 94080, 101670]",[73266.66666666667],[81350]
+/Users/morganlewis/PycharmProjects/snooker-vision/tests/./test_data/english_pool_dish_one_frame.mp4,9,9,8,1,1,"[2060, 5530, 30030, 42460, 57420, 71410, 94080, 101670]",[73266.66666666667],[81350]
+/Users/morganlewis/PycharmProjects/snooker-vision/tests/./test_data/english_pool_dish_one_frame.mp4,9,9,8,1,1,"[2060, 5530, 30030, 42460, 57420, 71410, 94080, 101670]",[73266.66666666667],[81350]
+/Users/morganlewis/PycharmProjects/snooker-vision/tests/./test_data/9_ball_clearance.mp4,0,9,0,0,9,[],[],"[13520, 22840, 30770, 40610, 52270, 66950, 76150, 85650, 95830]"
+/Users/morganlewis/PycharmProjects/snooker-vision/tests/./test_data/9_ball_clearance.mp4,6,9,3,3,6,"[66950, 76150, 95830]","[4204, 5005, 35269]","[13520, 22840, 30770, 40610, 52270, 85650]"
