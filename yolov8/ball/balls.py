@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from .ball import Ball
-import ultralytics
+from ..detection_results import DetectionResults
 
 
 class Balls:
@@ -38,24 +38,17 @@ class Balls:
     def items(self):
         return self.__balls.items()
 
-    def update(self, detections: ultralytics.engine.results.Results) -> None:
-        detections = detections.boxes
-
-        if detections.id is None:
+    def update(self, detections: DetectionResults) -> None:
+        if detections.is_empty():
             return
 
-        for i in range(len(detections.id)):
-            ball_id = int(detections.id[i])
-            ball_x = float(detections.xywh[i][0])
-            ball_y = float(detections.xywh[i][1])
-            ball_w = float(detections.xywh[i][2])
-            ball_h = float(detections.xywh[i][3])
+        for ball_id, ball in detections.items():
             if ball_id not in self.__balls:
-                self.__balls[ball_id] = Ball(ball_id, ball_x, ball_y, ball_w, ball_h)
+                self.__balls[ball_id] = Ball(ball_id, ball["x"], ball["y"], ball["w"], ball["h"])
                 continue
-            self.__balls[ball_id].update_position(ball_x, ball_y, ball_w, ball_h)
+            self.__balls[ball_id].update_position(ball["x"], ball["y"], ball["w"], ball["h"])
 
-        for missed_ball_id in set(self.__balls.keys()) - set(detections.id):
+        for missed_ball_id in set(self.__balls.keys()) - set(detections.keys()):
             self.__balls[missed_ball_id].missed_frame()
             # Remove balls that are missing for too long
             if self.__balls[missed_ball_id].missing_frame_count > self.stale_ball_threshold:

@@ -3,6 +3,8 @@ from __future__ import annotations
 import ultralytics
 
 from yolov8.ball import Balls
+from yolov8.detection_results import DetectionResults
+
 
 # IDEA: Consider moving the ball_roi method into the Ball class and let the Balls class update and keep track of
 # which balls are in a roi (the ball would also know itself). This would involve this class being passed into the
@@ -13,6 +15,7 @@ class Pockets:
     """
     Stores pocket information and updates which balls are in each pocket ROI.
     """
+
     def __init__(self, balls: Balls, pocket_coordinates: list[list[int, int]], pocket_roi_radii: list[int]):
         self.balls = balls
         self.pocket_coordinates = pocket_coordinates
@@ -34,21 +37,17 @@ class Pockets:
             for i, pocket_coord in enumerate(pocket_coordinates)
         }
 
-    def __call__(self, detection_results: ultralytics.engine.results.Results) -> None:
+    def __call__(self, detections: DetectionResults) -> None:
         """
         Update the state of the balls in the ROIs.
 
         :param detection_results: Model detection results
         """
-        if not isinstance(detection_results, ultralytics.engine.results.Results):
-            raise ValueError("Detection results must be of type ultralytics.engine.results.Results.")
 
-        detections = detection_results.boxes
-        if detections.id is None:
+        if detections.is_empty():
             return
 
-        ball_ids = [int(ball_id) for ball_id in detections.id]
-        self.update_balls_in_rois(ball_ids)
+        self.update_balls_in_rois(detections.keys())
 
     def __ball_roi(self, ball_id: int) -> tuple[int, list[int]] | tuple[()]:
         """

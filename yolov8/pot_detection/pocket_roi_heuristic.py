@@ -3,6 +3,7 @@ from __future__ import annotations
 import ultralytics.engine.results
 
 from yolov8.ball import Balls
+from yolov8.detection_results import DetectionResults
 
 
 class PocketROIHeuristic:
@@ -21,16 +22,13 @@ class PocketROIHeuristic:
     def __init__(self, balls: Balls):
         self.balls = balls
 
-    def __call__(self, detection_results: ultralytics.engine.results.Results) -> list[int]:
+    def __call__(self, detection_results: DetectionResults) -> list[int]:
         """
         Detects if a ball is potted and updates the state of the balls.
 
         :param detection_results: Model detection results
         :return: List of balls potted
         """
-        if not isinstance(detection_results, ultralytics.engine.results.Results):
-            raise ValueError("Detection results must be of type ultralytics.engine.results.Results.")
-
         balls_potted = self.detect()
         return balls_potted
 
@@ -49,5 +47,4 @@ class PocketROIHeuristic:
                 and not ball.pocketed
             ):
                 balls_potted.append(ball_id)
-                print(f"Ball {ball_id} potted in pocket {ball.pocket_roi[0]}")
         return balls_potted

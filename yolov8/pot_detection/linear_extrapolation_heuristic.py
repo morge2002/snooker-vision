@@ -5,6 +5,7 @@ import numpy as np
 import ultralytics.engine.results
 
 from yolov8.ball import Balls, Ball
+from yolov8.detection_results import DetectionResults
 from yolov8.pockets import Pockets
 
 
@@ -28,7 +29,7 @@ class LinearExtrapolationHeuristic:
         # The minimum velocity a ball can be travelling before it disappears to be considered a pot
         self.__pot_velocity_threshold = 1
 
-    def __call__(self, detection_results: ultralytics.engine.results.Results) -> list[int]:
+    def __call__(self, detection_results: DetectionResults) -> list[int]:
         """
         Identify balls potted by identifying balls that are no longer detected, were heading towards a pocket,
         and had reasonable velocity.
@@ -181,7 +182,7 @@ class LinearExtrapolationHeuristic:
             ball.y + (line_length * direction_vector[1]),
         ]
 
-    def draw_ball_direction_lines(self, detection_results: ultralytics.engine.results.Results, frame) -> None:
+    def draw_ball_direction_lines(self, detection_results: DetectionResults, frame) -> None:
         """
         Draw direction lines on the frame.
 
@@ -189,20 +190,19 @@ class LinearExtrapolationHeuristic:
         :param frame: The frame to draw onto.
         """
         path_predictions = self.get_balls_next_location_predictions()
-        for i, ball_id in enumerate(detection_results.boxes.id):
-            ball_id = int(ball_id)
+        for ball_id, ball in detection_results.items():
             if ball_id not in path_predictions:
                 continue
             predicted_ball_coord = path_predictions[ball_id]
             cv2.line(
                 frame,
-                (int(detection_results.boxes.xywh[i][0]), int(detection_results.boxes.xywh[i][1])),
+                (int(ball["x"]), int(ball["y"])),
                 (int(predicted_ball_coord[0]), int(predicted_ball_coord[1])),
                 (0, 255, 0),
                 2,
             )
 
-    def detect_pots(self, detection_results: ultralytics.engine.results.Results) -> list[int]:
+    def detect_pots(self, detection_results: DetectionResults) -> list[int]:
         """
         Finds balls that could have been potted based on their direction of travel.
 
@@ -210,7 +210,7 @@ class LinearExtrapolationHeuristic:
         :return: List of ball ids that have been detected as potted
         """
         balls_potted: list[int] = []
-        balls_detected = [int(ball_id) for ball_id in detection_results.boxes.id]
+        balls_detected = detection_results.keys()
         missing_balls = list(set(self.balls) - set(balls_detected))
         balls_towards_pockets = self.get_balls_towards_pockets(missing_balls)
         # print(f"Balls towards pockets: {balls_towards_pockets}")

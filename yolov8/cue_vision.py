@@ -6,6 +6,7 @@ import cv2
 from ultralytics import YOLO
 
 from yolov8.ball import Balls
+from yolov8.detection_results import DetectionResults
 from yolov8.pockets import Pockets
 from yolov8.pot_detection import PotDetector
 from yolov8.table_segmentation import TableProjection
@@ -63,23 +64,24 @@ class CueVision:
                 frame = table_projection(frame)
 
                 # Image detection and tracking
-                results = self.model.track(
+                yolo_results = self.model.track(
                     frame,
                     persist=True,
                     tracker=self.tracker_file_path,
                     max_det=17,
                     verbose=False,
                 )
+                detection_results: DetectionResults = DetectionResults(yolo_results[0])
 
                 # Skip the frame if no balls are detected/tracked
-                if results[0].boxes.id is None:
+                if detection_results.is_empty():
                     continue
 
                 annotated_frame = frame
 
                 if show_video:
                     # Visualize the detections and tracking
-                    annotated_frame = results[0].plot(labels=True, conf=False)
+                    annotated_frame = yolo_results[0].plot(labels=True, conf=False)
 
                     # Draw the pocket coordinates and RIOs on the frame
                     for pocket in pocket_coordinates:
@@ -87,7 +89,7 @@ class CueVision:
                             cv2.circle(annotated_frame, (pocket[0], pocket[1]), roi, (0, 0, 255), 2)
 
                     # Draw the ball center points
-                    for predicted_ball_coord in results[0].boxes.xywh:
+                    for ball in detection_results:
                         cv2.circle(
                             annotated_frame,
                             (int(predicted_ball_coord[0]), int(predicted_ball_coord[1])),
@@ -97,13 +99,13 @@ class CueVision:
                         )
 
                 # Update the ball positions and metadata
-                balls.update(results[0])
+                balls.update(detection_results)
 
                 # Update the pocket rois for the balls
-                pockets_tracker(results[0])
+                pockets_tracker(detection_results)
 
                 # Detect pots
-                pot_detector(results[0], cap.get(cv2.CAP_PROP_POS_MSEC), annotated_frame)
+                pot_detector(detection_results, round(cap.get(cv2.CAP_PROP_POS_MSEC)), projected_frame)
 
                 if show_video:
                     # Display the annotated frame

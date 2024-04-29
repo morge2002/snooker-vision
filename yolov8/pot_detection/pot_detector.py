@@ -2,6 +2,7 @@ from __future__ import annotations
 import ultralytics
 
 from yolov8.ball import Balls
+from yolov8.detection_results import DetectionResults
 from yolov8.pockets import Pockets
 from yolov8.pot_detection import PocketROIHeuristic, LinearExtrapolationHeuristic
 
@@ -39,7 +40,7 @@ class PotDetector:
         # Predicts the path of balls
         self.path_predictor = LinearExtrapolationHeuristic(balls, pockets)
 
-    def __call__(self, detection_results: ultralytics.engine.results.Results, timestamp, frame=None) -> None:
+    def __call__(self, detection_results: DetectionResults, timestamp, frame=None) -> None:
         self.detect_potential_pots(detection_results)
 
         self.path_predictor.draw_ball_direction_lines(detection_results, frame)
@@ -48,7 +49,7 @@ class PotDetector:
 
         self.detect_pots()
 
-    def detect_potential_pots(self, detection_results: ultralytics.engine.results.Results) -> None:
+    def detect_potential_pots(self, detection_results: DetectionResults) -> None:
         roi_pots: list[int] = self.pot_detector(detection_results)
         path_pots: list[int] = self.path_predictor(detection_results)
 
