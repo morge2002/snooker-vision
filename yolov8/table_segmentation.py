@@ -14,11 +14,17 @@ model = YOLO(model_path)
 # image_path = "test_data/snooker_photo.png"
 # image_path = "test_data/pool_table_start_position.jpg"
 # image_path = "test_data/ultimate_pool_table.png"
-image_path = "test_data/pool_table_start_position.png"
-# image_path = "test_data/pool_table_top_down.jpg"
+# image_path = "test_data/pool_table_start_position.png"
+
+image_path = "test_data/pool_table_top_down.jpg"
+
 # image_path = "test_data/snooker_table_start_layout.png"
 
 results = model(image_path)
+# Visualize the results on the frame
+annotated_frame = results[0].plot(labels=True, conf=False)
+# Display the annotated frame
+cv2.imshow("YOLOv8 Inference", annotated_frame)
 
 
 # Crop the image to the table region
@@ -33,9 +39,7 @@ def get_bbox(results, label_index):
 
 def get_billiard_table_bbox(inference_results):
     """Get the bounding box for the billiard table"""
-    table_label = list(results[0].names.keys())[
-        list(results[0].names.values()).index("Billiard table")
-    ]
+    table_label = list(results[0].names.keys())[list(results[0].names.values()).index("Billiard table")]
     return get_bbox(inference_results, table_label)
 
 
@@ -67,9 +71,7 @@ def find_billiard_table_colour(image):
     # Define criteria and apply kmeans()
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2)
     k = 5  # Number of clusters
-    _, labels, centers = cv2.kmeans(
-        pixels, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS
-    )
+    _, labels, centers = cv2.kmeans(pixels, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
 
     # Convert back to 8 bit values
     centers = np.uint8(centers)
@@ -125,9 +127,7 @@ def billiard_table_colour_mask(image_hsv, colour):
 
 def find_max_area_contour(img_mask):
     # Find the contours of the mask
-    contours, hierarchy = cv2.findContours(
-        img_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-    )
+    contours, hierarchy = cv2.findContours(img_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     # print("Number of contours:", len(contours))
     # print("Contour areas:", [cv2.contourArea(c) for c in contours])
     # print(hierarchy)
@@ -161,6 +161,7 @@ def find_billiard_table_corners(table_mask, table_image):
     # Find the largest contour
     max_area_contour, contours = find_max_area_contour(table_mask)
     cv2.drawContours(table_image, contours, -1, (0, 255, 0), 3)
+    cv2.imshow("Contours", table_image.copy())
 
     # Use OpenCV boundingRect function to get the details of the contour
     x, y, w, h = cv2.boundingRect(max_area_contour)
@@ -217,14 +218,10 @@ def find_billiard_table_corners(table_mask, table_image):
             # approx_table_corners = approx_table_corners.astype(np.float32)
             approx_table_corners = np.float32(
                 [
-                    approx_table_corners[0]
-                    + [-table_tolerance, -table_tolerance],  # Top-left
-                    approx_table_corners[1]
-                    + [table_tolerance, -table_tolerance],  # Top-right
-                    approx_table_corners[2]
-                    + [table_tolerance, table_tolerance],  # Bottom-right
-                    approx_table_corners[3]
-                    + [-table_tolerance, table_tolerance],  # Bottom-left
+                    approx_table_corners[0] + [-table_tolerance, -table_tolerance],  # Top-left
+                    approx_table_corners[1] + [table_tolerance, -table_tolerance],  # Top-right
+                    approx_table_corners[2] + [table_tolerance, table_tolerance],  # Bottom-right
+                    approx_table_corners[3] + [-table_tolerance, table_tolerance],  # Bottom-left
                 ]
             )
             print(f"Approximate corners: {approx_table_corners}")
@@ -239,7 +236,8 @@ def find_billiard_table_corners(table_mask, table_image):
 image = cv2.imread(image_path)
 
 # Crop the table region
-table_image = crop_billiard_table(image, results)
+# table_image = crop_billiard_table(image, results)
+table_image = image.copy()
 table_projection_image = table_image.copy()
 
 # Skip crop for now
@@ -251,19 +249,17 @@ table_colour = find_billiard_table_colour(table_image)
 
 # Create a mask for the table color
 table_image_hsv = cv2.cvtColor(table_image.copy(), cv2.COLOR_BGR2HSV)
-table_mask = billiard_table_colour_mask(table_image_hsv, table_colour)
+table_mask = billiard_table_colour_mask(table_image_hsv.copy(), table_colour)
 
 # Find the corners of the billiard table
-approx_table_corners = find_billiard_table_corners(table_mask, table_image)
+approx_table_corners = find_billiard_table_corners(table_mask.copy(), table_image)
 
 # Project the table to a rectangle
-table_projection_image = table_projection(table_projection_image, approx_table_corners)
-cv2.imshow("Table Projection", table_projection_image)
+table_projection_crop_image = table_projection(table_projection_image.copy(), approx_table_corners)
+cv2.imshow("Table Projection", table_projection_crop_image)
 
 # Mask the table projection with black
-pocket_mask = billiard_table_colour_mask(
-    table_projection_image.copy(), np.array([20, 20, 20], np.uint8)
-)
+pocket_mask = billiard_table_colour_mask(table_projection_image.copy(), np.array([20, 20, 20], np.uint8))
 cv2.imshow("Pocket Mask", pocket_mask)
 
 # --- Edge detection and line detection ---
