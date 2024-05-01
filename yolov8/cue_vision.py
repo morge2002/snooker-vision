@@ -130,14 +130,14 @@ class CueVision:
 
 if __name__ == "__main__":
     # Path to the YOLOv8 model
-    model_path = os.path.join(os.path.dirname(__file__), "./runs/detect/train14/weights/best_openvino_model")
+    model_path = os.path.join(os.path.dirname(__file__), "./runs/detect/train15/weights/best_openvino_model")
 
     # Path to the video file
     # video_path = "../tests/test_data/english_pool_dish_one_frame.mp4"
-    # video_path = "../tests/test_data/snooker_clearance_portrait.mov"
+    video_path = "../tests/test_data/snooker_clearance_portrait.mov"
     # video_path = "../tests/test_data/9_ball_clearance.mp4"
     # video_path = "../tests/test_data/english_pool_clearance_1.mp4"
-    video_path = "../tests/test_data/barton_snooker_clearance_10_pots.mp4"
+    # video_path = "../tests/test_data/barton_snooker_clearance_10_pots.mp4"
     # Run the CueVision pipeline
     cue_vision = CueVision(model_path, pocket_rois=[5, 25, 50])
     pots = cue_vision(video_path, show_video=True)

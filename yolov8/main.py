@@ -109,10 +109,10 @@ if video_inference:
                     cv2.circle(annotated_frame, (pocket[0], pocket[1]), roi, (0, 0, 255), 2)
 
             # Draw the ball center points
-            for predicted_ball_coord in results[0].boxes.xywh:
-                cv2.circle(
-                    annotated_frame, (int(predicted_ball_coord[0]), int(predicted_ball_coord[1])), 2, (255, 0, 255), 2
-                )
+            # for predicted_ball_coord in results[0].boxes.xywh:
+            #     cv2.circle(
+            #         annotated_frame, (int(predicted_ball_coord[0]), int(predicted_ball_coord[1])), 2, (255, 0, 255), 2
+            #     )
 
             # Update the ball positions and metadata
             balls.update(results[0])
