@@ -1,0 +1,15 @@
+description: Ultralytics best model (untrained)
+author: Ultralytics
+license: AGPL-3.0 https://ultralytics.com/license
+date: '2024-04-25T23:18:53.901901'
+version: 8.0.145
+stride: 32
+task: detect
+batch: 1
+imgsz:
+- 640
+- 640
+names:
+  0: Ball
+  1: Billiard table
+  2: Pocket
